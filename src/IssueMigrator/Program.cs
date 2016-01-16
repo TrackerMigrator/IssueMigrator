@@ -72,7 +72,15 @@ namespace CodePlexIssueMigrator
 			var issues = codePlexParser.GetIssues();
 			var gitHubWorker = new GitHubWorker(_options);
 
-			await gitHubWorker.Run(issues);
+			if (_options.IssueNumber.HasValue)
+			{
+				var issue = issues.Find(i => i.Id == _options.IssueNumber.Value);
+				await gitHubWorker.RunFor(issue);
+			}
+			else
+			{
+				await gitHubWorker.Run(issues);
+			}
 		}
 	}
 }

@@ -15,6 +15,7 @@ namespace CodePlexIssueMigrator
 		const string GitHubRepositoryHelpText = "GitHub repository.";
 		const string GitHubOwnerHelpText = "GitHub repository owner/organization.";
 		const string GitHubAccessTokenHelpText = "GitHub Access Token.";
+		const string IssueNumberTokenHelpText = "Only migrate numbered issue.";
 
 		[HelpOption]
 		public string GetHelp()
@@ -35,5 +36,8 @@ namespace CodePlexIssueMigrator
 
 		[Option("key", Required = true, HelpText = GitHubAccessTokenHelpText)]
 		public string GitHubAccessToken { get; set; }
+
+		[Option("issue", HelpText = IssueNumberTokenHelpText)]
+		public int? IssueNumber { get; set; }
 	}
 }

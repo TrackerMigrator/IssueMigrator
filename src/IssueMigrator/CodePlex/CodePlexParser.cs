@@ -23,8 +23,10 @@ namespace CodePlexIssueMigrator.CodePlex
 			_httpClient = new HttpClient();
 		}
 
-		public IEnumerable<CodePlexIssue> GetIssues(int size = 100)
+		public List<CodePlexIssue> GetIssues(int size = 100)
 		{
+			List<CodePlexIssue> issues = new List<CodePlexIssue>();
+
 			// Find the number of discussions
 			var numberOfDiscussions = GetNumberOfItems();
 
@@ -51,9 +53,11 @@ namespace CodePlexIssueMigrator.CodePlex
 					codeplexIssue.Status = status;
 					codeplexIssue.Type = type;
 					codeplexIssue.Impact = impact;
-					yield return codeplexIssue;
+					issues.Add(codeplexIssue);
 				}
 			}
+
+			return issues;
 		}
 
 		private int GetNumberOfItems()

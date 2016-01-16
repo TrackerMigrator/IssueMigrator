@@ -29,52 +29,49 @@ namespace CodePlexIssueMigrator.GitHub
 
 		public async Task Run(IEnumerable<CodePlexIssue> issues)
 		{
+			return;
 			foreach (var issue in issues)
 			{
-				if (issue.IsClosed())
-				{
-					continue;
-				}
-
-				var codePlexIssueUrl = string.Format("http://{0}.codeplex.com/workitem/{1}", _options.CodeplexProject, issue.Id);
-				var description = new StringBuilder();
-				description.AppendFormat("**This issue was imported from [CodePlex]({0})**", codePlexIssueUrl);
-				description.AppendLine();
-				description.AppendLine();
-				description.AppendFormat(CultureInfo.InvariantCulture, "**[{0}](http://www.codeplex.com/site/users/view/{0})** wrote {1:yyyy-MM-dd} at {1:HH:mm}\r\n", issue.ReportedBy, issue.Time);
-				description.Append(issue.Description);
-				foreach (var comment in issue.Comments)
-				{
-					description.AppendLine();
-					description.AppendLine();
-					description.AppendFormat(CultureInfo.InvariantCulture, "**[{0}](http://www.codeplex.com/site/users/view/{0})** wrote {1:yyyy-MM-dd} at {1:HH:mm}\r\n", comment.Author, comment.Time);
-					description.Append(comment.Content);
-					// await CreateComment(gitHubIssue.Number, comment.Content);
-				}
-
-				var labels = new List<string>();
-
-				if (issue.Type == "Feature")
-				{
-					labels.Add("enhancement");
-				}
-
-				// if (issue.Type == "Issue")
-				//    labels.Add("bug");
-				// if (issue.Impact == "Low" || issue.Impact == "Medium" || issue.Impact == "High")
-				//    labels.Add(issue.Impact);
-				var gitHubIssue = await CreateIssue(issue.Title, description.ToString().Trim(), labels);
-
-				if (issue.IsClosed())
-				{
-					await CloseIssue(gitHubIssue);
-				}
+				await CreateIssue(issue);
 			}
 		}
-
-		private async Task<Issue> CreateIssue(string title, string body, List<string> labels)
+		public async Task RunFor(CodePlexIssue issue)
 		{
-			var issue = new NewIssue(title) { Body = body };
+			await CreateIssue(issue);
+		}
+
+
+		private async Task CreateIssue(CodePlexIssue codePlexIssue)
+		{
+			var codePlexIssueUrl = string.Format("http://{0}.codeplex.com/workitem/{1}", _options.CodeplexProject, codePlexIssue.Id);
+			var description = new StringBuilder();
+			description.AppendFormat("**This issue was imported from [CodePlex]({0})**", codePlexIssueUrl);
+			description.AppendLine();
+			description.AppendLine();
+			description.AppendFormat(CultureInfo.InvariantCulture, "**[{0}](http://www.codeplex.com/site/users/view/{0})** wrote {1:yyyy-MM-dd} at {1:HH:mm}\r\n", codePlexIssue.ReportedBy, codePlexIssue.Time);
+			description.Append(codePlexIssue.Description);
+			foreach (var comment in codePlexIssue.Comments)
+			{
+				description.AppendLine();
+				description.AppendLine();
+				description.AppendFormat(CultureInfo.InvariantCulture, "**[{0}](http://www.codeplex.com/site/users/view/{0})** wrote {1:yyyy-MM-dd} at {1:HH:mm}\r\n", comment.Author, comment.Time);
+				description.Append(comment.Content);
+				// await CreateComment(gitHubIssue.Number, comment.Content);
+			}
+
+			var labels = new List<string>();
+
+			if (codePlexIssue.Type == "Feature")
+			{
+				labels.Add("enhancement");
+			}
+
+			// if (codePlexIssue.Type == "Issue")
+			//    labels.Add("bug");
+			// if (codePlexIssue.Impact == "Low" || codePlexIssue.Impact == "Medium" || codePlexIssue.Impact == "High")
+			//    labels.Add(issue.Impact);
+
+			var issue = new NewIssue(codePlexIssue.Title) { Body = description.ToString().Trim() };
 			issue.Labels.Add("CodePlex");
 			foreach (var label in labels)
 			{
@@ -84,7 +81,12 @@ namespace CodePlexIssueMigrator.GitHub
 				}
 			}
 
-			return await _gitHubClient.Issue.Create(_options.GitHubOwner, _options.GitHubRepository, issue);
+			var gitHubIssue = await _gitHubClient.Issue.Create(_options.GitHubOwner, _options.GitHubRepository, issue);
+
+			if (codePlexIssue.IsClosed())
+			{
+				await CloseIssue(gitHubIssue);
+			}
 		}
 
 		private async Task CreateComment(int number, string comment)
