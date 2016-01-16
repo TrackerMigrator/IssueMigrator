@@ -66,15 +66,15 @@ namespace CodePlexIssueMigrator
 			var credentials = new Credentials(options.GitHubAccessToken);
 			var connection = new Connection(new ProductHeaderValue("CodeplexIssueMigrator")) { Credentials = credentials };
 			_gitHubClient = new GitHubClient(connection);
-
-			Console.WriteLine("Source: {0}.codeplex.com", options.CodeplexProject);
-			Console.WriteLine("Destination: github.com/{0}/{1}", options.GitHubOwner, options.GitHubRepository);
 		}
 
 		/// <summary>
 		/// The main logic for migrate CodePlex project issues to GitHub.</summary>
 		private void Run()
 		{
+			Console.WriteLine("Source: {0}.codeplex.com", _options.CodeplexProject);
+			Console.WriteLine("Destination: github.com/{0}/{1}", _options.GitHubOwner, _options.GitHubRepository);
+
 			Console.WriteLine("Migrating issues:");
 
 			MigrateIssues().Wait();
