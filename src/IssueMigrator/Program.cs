@@ -12,7 +12,7 @@ using Octokit;
 
 namespace CodePlexIssueMigrator
 {
-	public class Program
+	public static class Program
 	{
 		// CodePlex project
 		private static string codePlexProject;
