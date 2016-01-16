@@ -8,6 +8,8 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 
+using CommandLine;
+
 using Octokit;
 
 namespace CodePlexIssueMigrator
@@ -31,16 +33,16 @@ namespace CodePlexIssueMigrator
 
 		static int Main(string[] args)
 		{
-			if (args.Length < 4)
+			var options = new CommandLineOptions();
+			if (!Parser.Default.ParseArguments(args, options))
 			{
-				Console.WriteLine("Missing arguments: [CodeplexProject] [GitHubOwner] [GitHubRepository] [GitHubAccessToken]");
 				return 1;
 			}
 
-			codePlexProject = args[0];
-			gitHubOwner = args[1];
-			gitHubRepository = args[2];
-			gitHubAccessToken = args[3];
+			codePlexProject = options.CodeplexProject;
+			gitHubOwner = options.GitHubOwner;
+			gitHubRepository = options.GitHubRepository;
+			gitHubAccessToken = options.GitHubAccessToken;
 
 			httpClient = new HttpClient();
 
