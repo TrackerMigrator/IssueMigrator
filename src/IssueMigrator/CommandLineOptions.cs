@@ -11,10 +11,10 @@ namespace CodePlexIssueMigrator
 	{
 		#region HelpText
 
-		const string CodeplexProjectHelpText = "The name of the CodePlex project to migrate.";
-		const string GitHubRepositoryHelpText = "The name of the GitHub repository.";
-		const string GitHubOwnerHelpText = "The name of the dump GitHub repository owner/organization.";
-		const string GitHubAccessTokenHelpText = "The name of the dump GitHub Access Token.";
+		const string CodeplexProjectHelpText = "CodePlex project to migrate.";
+		const string GitHubRepositoryHelpText = "GitHub repository.";
+		const string GitHubOwnerHelpText = "GitHub repository owner/organization.";
+		const string GitHubAccessTokenHelpText = "GitHub Access Token.";
 
 		[HelpOption]
 		public string GetHelp()
