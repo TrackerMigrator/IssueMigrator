@@ -1,7 +1,7 @@
 
 using System.Collections.Generic;
 
-namespace CodePlexIssueMigrator
+namespace CodePlexIssueMigrator.CodePlex
 {
 	public class CodePlexIssue
 	{

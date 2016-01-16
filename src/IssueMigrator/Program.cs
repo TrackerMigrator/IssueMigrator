@@ -12,6 +12,8 @@ using CommandLine;
 
 using Octokit;
 
+using CodePlexIssueMigrator.CodePlex;
+
 namespace CodePlexIssueMigrator
 {
 	public class Program
