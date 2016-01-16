@@ -42,7 +42,9 @@ namespace CodePlexIssueMigrator.CodePlex
 					var type = GetMatch(issue, "<td class=\"Type\">(.+?)</td>");
 					var impact = GetMatch(issue, "<td class=\"Severity\">(.+?)</td>");
 					var title = GetMatch(issue, "<a id=\"TitleLink.*>(.*?)</a>");
+
 					Console.WriteLine("{0} ({1}) : {2}", id, status, title);
+
 					var codeplexIssue = GetIssue(id).Result;
 					codeplexIssue.Id = id;
 					codeplexIssue.Title = HtmlToMarkdown(title);
@@ -61,9 +63,9 @@ namespace CodePlexIssueMigrator.CodePlex
 			return int.Parse(GetMatch(html, "Selected\">(\\d+)</span> items"));
 		}
 
-		private async Task<CodePlexIssue> GetIssue(int number)
+		public async Task<CodePlexIssue> GetIssue(int id)
 		{
-			var url = string.Format("http://{0}.codeplex.com/workitem/{1}", _codePlexProject, number);
+			var url = string.Format("http://{0}.codeplex.com/workitem/{1}", _codePlexProject, id);
 			var html = await _httpClient.GetStringAsync(url);
 
 			var description = GetMatch(html, "descriptionContent\">(.*?)</div>");
