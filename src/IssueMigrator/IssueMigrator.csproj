@@ -58,6 +58,7 @@
     <Compile Include="CodePlex\CodePlexIssue.cs" />
     <Compile Include="CodePlex\CodePlexParser.cs" />
     <Compile Include="CommandLineOptions.cs" />
+    <Compile Include="GitHub\GitHubWorker.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
