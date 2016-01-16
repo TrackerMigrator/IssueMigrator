@@ -29,7 +29,6 @@ namespace CodePlexIssueMigrator.GitHub
 
 		public async Task Run(IEnumerable<CodePlexIssue> issues)
 		{
-			return;
 			foreach (var issue in issues)
 			{
 				await CreateIssue(issue);
