@@ -20,7 +20,7 @@ namespace CodePlexIssueMigrator
 		private readonly CommandLineOptions _options;
 
 		/// <summary>GitHub API Client.</summary>
-		private GitHubClient _client;
+		private GitHubClient _gitHubClient;
 
 		/// <summary>Http client to connect to CodePlex.</summary>
 		private HttpClient _httpClient;
@@ -65,7 +65,7 @@ namespace CodePlexIssueMigrator
 
 			var credentials = new Credentials(options.GitHubAccessToken);
 			var connection = new Connection(new ProductHeaderValue("CodeplexIssueMigrator")) { Credentials = credentials };
-			_client = new GitHubClient(connection);
+			_gitHubClient = new GitHubClient(connection);
 
 			Console.WriteLine("Source: {0}.codeplex.com", options.CodeplexProject);
 			Console.WriteLine("Destination: github.com/{0}/{1}", options.GitHubOwner, options.GitHubRepository);
@@ -230,12 +230,12 @@ namespace CodePlexIssueMigrator
 				}
 			}
 
-			return await _client.Issue.Create(_options.GitHubOwner, _options.GitHubRepository, issue);
+			return await _gitHubClient.Issue.Create(_options.GitHubOwner, _options.GitHubRepository, issue);
 		}
 
 		private async Task CreateComment(int number, string comment)
 		{
-			await _client.Issue.Comment.Create(_options.GitHubOwner, _options.GitHubRepository, number, comment);
+			await _gitHubClient.Issue.Comment.Create(_options.GitHubOwner, _options.GitHubRepository, number, comment);
 		}
 
 		private async Task CloseIssue(Issue issue)
@@ -246,7 +246,7 @@ namespace CodePlexIssueMigrator
 				issueUpdate.Labels.Add(label.Name);
 			}
 
-			await _client.Issue.Update(_options.GitHubOwner, _options.GitHubRepository, issue.Number, issueUpdate);
+			await _gitHubClient.Issue.Update(_options.GitHubOwner, _options.GitHubRepository, issue.Number, issueUpdate);
 		}
 
 		/// <summary>
