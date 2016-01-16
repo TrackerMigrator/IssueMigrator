@@ -7,7 +7,7 @@ namespace CodePlexIssueMigrator
 	/// <summary>
 	/// The options class which contains the different options to CodePlex to GitHub migration utility.
 	/// </summary>
-	class CommandLineOptions
+	public class CommandLineOptions
 	{
 		#region HelpText
 

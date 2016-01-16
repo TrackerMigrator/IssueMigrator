@@ -14,52 +14,76 @@ using Octokit;
 
 namespace CodePlexIssueMigrator
 {
-	public static class Program
+	public class Program
 	{
-		// CodePlex project
-		private static string codePlexProject;
+		/// <summary>Command line arguments.</summary>
+		private readonly CommandLineOptions _options;
 
-		// GitHub owner (organization or user)
-		private static string gitHubOwner;
+		/// <summary>GitHub API Client.</summary>
+		private GitHubClient _client;
 
-		// GitHub repository
-		private static string gitHubRepository;
-
-		// GitHub API access token
-		private static string gitHubAccessToken;
-
-		private static GitHubClient client;
-		private static HttpClient httpClient;
+		/// <summary>Http client to connect to CodePlex.</summary>
+		private HttpClient _httpClient;
 
 		static int Main(string[] args)
 		{
+			var returnCode = 0;
+			var isValidOptions = true;
+
 			var options = new CommandLineOptions();
 			if (!Parser.Default.ParseArguments(args, options))
 			{
-				return 1;
+				returnCode = 1;
+				isValidOptions = false;
 			}
 
-			codePlexProject = options.CodeplexProject;
-			gitHubOwner = options.GitHubOwner;
-			gitHubRepository = options.GitHubRepository;
-			gitHubAccessToken = options.GitHubAccessToken;
+			if (isValidOptions)
+			{
+				try
+				{
+					var program = new Program(options);
+					program.Run();
+				}
+				catch (Exception ex)
+				{
+					returnCode = -1;
+					Console.WriteLine("Exception occurred while running. Exception is: {0}", ex.Message);
+				}
+			}
 
-			httpClient = new HttpClient();
+			return returnCode;
+		}
 
-			var credentials = new Credentials(gitHubAccessToken);
+		/// <summary>
+		/// Constructs a new program with the given options.
+		/// </summary>
+		protected Program(CommandLineOptions options)
+		{
+			_options = options;
+
+			_httpClient = new HttpClient();
+
+			var credentials = new Credentials(options.GitHubAccessToken);
 			var connection = new Connection(new ProductHeaderValue("CodeplexIssueMigrator")) { Credentials = credentials };
-			client = new GitHubClient(connection);
-			Console.WriteLine("Source: {0}.codeplex.com", codePlexProject);
-			Console.WriteLine("Destination: github.com/{0}/{1}", gitHubOwner, gitHubRepository);
+			_client = new GitHubClient(connection);
+
+			Console.WriteLine("Source: {0}.codeplex.com", options.CodeplexProject);
+			Console.WriteLine("Destination: github.com/{0}/{1}", options.GitHubOwner, options.GitHubRepository);
+		}
+
+		/// <summary>
+		/// The main logic for migrate CodePlex project issues to GitHub.</summary>
+		private void Run()
+		{
 			Console.WriteLine("Migrating issues:");
+
 			MigrateIssues().Wait();
 
 			Console.WriteLine();
 			Console.WriteLine("Completed successfully.");
-			return 0;
 		}
 
-		static async Task MigrateIssues()
+		private async Task MigrateIssues()
 		{
 			var issues = GetIssues();
 			foreach (var issue in issues)
@@ -69,7 +93,7 @@ namespace CodePlexIssueMigrator
 					continue;
 				}
 
-				var codePlexIssueUrl = string.Format("http://{0}.codeplex.com/workitem/{1}", codePlexProject, issue.Id);
+				var codePlexIssueUrl = string.Format("http://{0}.codeplex.com/workitem/{1}", _options.CodeplexProject, issue.Id);
 				var description = new StringBuilder();
 				description.AppendFormat("**This issue was imported from [CodePlex]({0})**", codePlexIssueUrl);
 				description.AppendLine();
@@ -105,7 +129,7 @@ namespace CodePlexIssueMigrator
 			}
 		}
 
-		static IEnumerable<CodePlexIssue> GetIssues(int size = 100)
+		private IEnumerable<CodePlexIssue> GetIssues(int size = 100)
 		{
 			// Find the number of discussions
 			var numberOfDiscussions = GetNumberOfItems();
@@ -115,8 +139,8 @@ namespace CodePlexIssueMigrator
 
 			for (int page = 0; page < pages; page++)
 			{
-				var url = string.Format("http://{0}.codeplex.com/workitem/list/advanced?keyword=&status=All&type=All&priority=All&release=All&assignedTo=All&component=All&sortField=Id&sortDirection=Ascending&size={1}&page={2}", codePlexProject, size, page);
-				var html = httpClient.GetStringAsync(url).Result;
+				var url = string.Format("http://{0}.codeplex.com/workitem/list/advanced?keyword=&status=All&type=All&priority=All&release=All&assignedTo=All&component=All&sortField=Id&sortDirection=Ascending&size={1}&page={2}", _options.CodeplexProject, size, page);
+				var html = _httpClient.GetStringAsync(url).Result;
 				foreach (var issue in GetMatches(html, "<tr id=\"row_checkbox_\\d+\" class=\"CheckboxRow\">(.*?)</tr>"))
 				{
 					var id = int.Parse(GetMatch(issue, "<td class=\"ID\">(\\d+?)</td>"));
@@ -136,17 +160,17 @@ namespace CodePlexIssueMigrator
 			}
 		}
 
-		private static int GetNumberOfItems()
+		private int GetNumberOfItems()
 		{
-			var url = string.Format("https://{0}.codeplex.com/workitem/list/advanced", codePlexProject);
-			var html = httpClient.GetStringAsync(url).Result;
+			var url = string.Format("https://{0}.codeplex.com/workitem/list/advanced", _options.CodeplexProject);
+			var html = _httpClient.GetStringAsync(url).Result;
 			return int.Parse(GetMatch(html, "Selected\">(\\d+)</span> items"));
 		}
 
-		static async Task<CodePlexIssue> GetIssue(int number)
+		private async Task<CodePlexIssue> GetIssue(int number)
 		{
-			var url = string.Format("http://{0}.codeplex.com/workitem/{1}", codePlexProject, number);
-			var html = await httpClient.GetStringAsync(url);
+			var url = string.Format("http://{0}.codeplex.com/workitem/{1}", _options.CodeplexProject, number);
+			var html = await _httpClient.GetStringAsync(url);
 
 			var description = GetMatch(html, "descriptionContent\">(.*?)</div>");
 			var reportedBy = GetMatch(html, "ReportedByLink.*?>(.*?)</a>");
@@ -187,14 +211,14 @@ namespace CodePlexIssueMigrator
 			return issue;
 		}
 
-		private static string HtmlToMarkdown(string html)
+		private string HtmlToMarkdown(string html)
 		{
 			var text = HttpUtility.HtmlDecode(html);
 			text = text.Replace("<br>", "\r\n");
 			return text.Trim();
 		}
 
-		private static async Task<Issue> CreateIssue(string title, string body, List<string> labels)
+		private async Task<Issue> CreateIssue(string title, string body, List<string> labels)
 		{
 			var issue = new NewIssue(title) { Body = body };
 			issue.Labels.Add("CodePlex");
@@ -206,15 +230,15 @@ namespace CodePlexIssueMigrator
 				}
 			}
 
-			return await client.Issue.Create(gitHubOwner, gitHubRepository, issue);
+			return await _client.Issue.Create(_options.GitHubOwner, _options.GitHubRepository, issue);
 		}
 
-		private static async Task CreateComment(int number, string comment)
+		private async Task CreateComment(int number, string comment)
 		{
-			await client.Issue.Comment.Create(gitHubOwner, gitHubRepository, number, comment);
+			await _client.Issue.Comment.Create(_options.GitHubOwner, _options.GitHubRepository, number, comment);
 		}
 
-		private static async Task CloseIssue(Issue issue)
+		private async Task CloseIssue(Issue issue)
 		{
 			var issueUpdate = new IssueUpdate { State = ItemState.Closed };
 			foreach (var label in issue.Labels)
@@ -222,7 +246,7 @@ namespace CodePlexIssueMigrator
 				issueUpdate.Labels.Add(label.Name);
 			}
 
-			await client.Issue.Update(gitHubOwner, gitHubRepository, issue.Number, issueUpdate);
+			await _client.Issue.Update(_options.GitHubOwner, _options.GitHubRepository, issue.Number, issueUpdate);
 		}
 
 		/// <summary>
@@ -231,7 +255,7 @@ namespace CodePlexIssueMigrator
 		/// <param name="input">The input string.</param>
 		/// <param name="expression">Regular expression with one group.</param>
 		/// <returns>The value of the first group.</returns>
-		private static string GetMatch(string input, string expression)
+		private string GetMatch(string input, string expression)
 		{
 			var titleMatch = Regex.Match(input, expression, RegexOptions.Multiline | RegexOptions.Singleline);
 			return titleMatch.Groups[1].Value;
@@ -243,7 +267,7 @@ namespace CodePlexIssueMigrator
 		/// <param name="input">The input string.</param>
 		/// <param name="expression">Regular expression with a group that should be captured.</param>
 		/// <returns>A sequence of values from the first group of the matches.</returns>
-		private static IEnumerable<string> GetMatches(string input, string expression)
+		private IEnumerable<string> GetMatches(string input, string expression)
 		{
 			foreach (Match match in Regex.Matches(input, expression, RegexOptions.Multiline | RegexOptions.Singleline))
 			{
