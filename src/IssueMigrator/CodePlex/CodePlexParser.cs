@@ -117,7 +117,7 @@ namespace CodePlexIssueMigrator.CodePlex
 		private string HtmlToMarkdown(string html)
 		{
 			var text = HttpUtility.HtmlDecode(html);
-			text = text.Replace("<br>", "\r\n");
+			text = text.Replace("\r\n<br>\r\n", "\r\n");
 			return text.Trim();
 		}
 
