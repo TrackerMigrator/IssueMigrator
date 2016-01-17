@@ -34,6 +34,7 @@ namespace CodePlexIssueMigrator.GitHub
 				await CreateIssue(issue);
 			}
 		}
+
 		public async Task RunFor(CodePlexIssue issue)
 		{
 			await CreateIssue(issue);

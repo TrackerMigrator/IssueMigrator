@@ -40,19 +40,11 @@ namespace CodePlexIssueMigrator.CodePlex
 				foreach (var issue in GetMatches(html, "<tr id=\"row_checkbox_\\d+\" class=\"CheckboxRow\">(.*?)</tr>"))
 				{
 					var id = int.Parse(GetMatch(issue, "<td class=\"ID\">(\\d+?)</td>"));
-					var status = GetMatch(issue, "<td class=\"Status\">(.+?)</td>");
-					var type = GetMatch(issue, "<td class=\"Type\">(.+?)</td>");
-					var impact = GetMatch(issue, "<td class=\"Severity\">(.+?)</td>");
 					var title = GetMatch(issue, "<a id=\"TitleLink.*>(.*?)</a>");
 
-					Console.WriteLine("{0} ({1}) : {2}", id, status, title);
+					Console.WriteLine("{0} : {1}", id, title);
 
 					var codeplexIssue = GetIssue(id).Result;
-					codeplexIssue.Id = id;
-					codeplexIssue.Title = HtmlToMarkdown(title);
-					codeplexIssue.Status = status;
-					codeplexIssue.Type = type;
-					codeplexIssue.Impact = impact;
 					issues.Add(codeplexIssue);
 				}
 			}
@@ -75,6 +67,11 @@ namespace CodePlexIssueMigrator.CodePlex
 			var description = GetMatch(html, "descriptionContent\">(.*?)</div>");
 			var reportedBy = GetMatch(html, "ReportedByLink.*?>(.*?)</a>");
 
+			var title = GetMatch(html, "<h1 id=\"workItemTitle.*>(.*?)</h1>");
+			var status = GetMatch(html, "StatusLink.*?>(.*?)</a>");
+			var type = GetMatch(html, "TypeLink.*?>(.*?)</a>");
+			var impact = GetMatch(html, "ImpactLink.*?>(.*?)</a>");
+
 			var reportedTimeString = GetMatch(html, "ReportedOnDateTime.*?title=\"(.*?)\"");
 			DateTime reportedTime;
 			DateTime.TryParse(
@@ -84,6 +81,12 @@ namespace CodePlexIssueMigrator.CodePlex
 				out reportedTime);
 
 			var issue = new CodePlexIssue { Description = HtmlToMarkdown(description), ReportedBy = reportedBy, Time = reportedTime };
+
+			issue.Id = id;
+			issue.Title = HtmlToMarkdown(title);
+			issue.Status = status;
+			issue.Type = type;
+			issue.Impact = impact;
 
 			for (int i = 0; ; i++)
 			{

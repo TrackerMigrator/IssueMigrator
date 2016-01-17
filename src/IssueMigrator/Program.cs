@@ -58,8 +58,6 @@ namespace CodePlexIssueMigrator
 			Console.WriteLine("Source: {0}.codeplex.com", _options.CodeplexProject);
 			Console.WriteLine("Destination: github.com/{0}/{1}", _options.GitHubOwner, _options.GitHubRepository);
 
-			Console.WriteLine("Migrating issues:");
-
 			MigrateIssues().Wait();
 
 			Console.WriteLine();
@@ -69,17 +67,20 @@ namespace CodePlexIssueMigrator
 		private async Task MigrateIssues()
 		{
 			var codePlexParser = new CodePlexParser(_options.CodeplexProject);
-			var issues = codePlexParser.GetIssues();
 			var gitHubWorker = new GitHubWorker(_options);
 
 			if (_options.IssueNumber.HasValue)
 			{
-				var issue = issues.Find(i => i.Id == _options.IssueNumber.Value);
+				Console.WriteLine("Migrating issue #{0}:", _options.IssueNumber.Value);
+				var issue = await codePlexParser.GetIssue(_options.IssueNumber.Value);
+				Console.WriteLine("{0} : {1}", issue.Id, issue.Title);
+
 				await gitHubWorker.RunFor(issue);
 			}
 			else
 			{
-				await gitHubWorker.Run(issues);
+				Console.WriteLine("Migrating issues:");
+				await gitHubWorker.Run(codePlexParser.GetIssues());
 			}
 		}
 	}
