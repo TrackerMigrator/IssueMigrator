@@ -5,7 +5,8 @@ using System.Globalization;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Web;
+
+using HtmlAgilityPack;
 
 namespace CodePlexIssueMigrator.CodePlex
 {
@@ -64,15 +65,19 @@ namespace CodePlexIssueMigrator.CodePlex
 			var url = string.Format("http://{0}.codeplex.com/workitem/{1}", _codePlexProject, id);
 			var html = await _httpClient.GetStringAsync(url);
 
-			var description = GetMatch(html, "descriptionContent\">(.*?)</div>");
-			var reportedBy = GetMatch(html, "ReportedByLink.*?>(.*?)</a>");
+			HtmlDocument doc = new HtmlDocument();
+			doc.LoadHtml(html);
+			var root = doc.DocumentNode;
 
-			var title = GetMatch(html, "<h1 id=\"workItemTitle.*>(.*?)</h1>");
-			var status = GetMatch(html, "StatusLink.*?>(.*?)</a>");
-			var type = GetMatch(html, "TypeLink.*?>(.*?)</a>");
-			var impact = GetMatch(html, "ImpactLink.*?>(.*?)</a>");
+			var description = root.SelectSingleNode("//div[@id='descriptionContent']").InnerText;
+			var reportedBy = root.SelectSingleNode("//a[@id='ReportedByLink']").InnerText;
 
-			var reportedTimeString = GetMatch(html, "ReportedOnDateTime.*?title=\"(.*?)\"");
+			var title = root.SelectSingleNode("//h1[@id='workItemTitle']").InnerText;
+			var status = root.SelectSingleNode("//a[@id='StatusLink']").InnerText;
+			var type = root.SelectSingleNode("//a[@id='TypeLink']").InnerText;
+			var impact = root.SelectSingleNode("//a[@id='ImpactLink']").InnerText;
+
+			var reportedTimeString = root.SelectSingleNode("//span[@id='ReportedOnDateTime']").InnerText;
 			DateTime reportedTime;
 			DateTime.TryParse(
 				reportedTimeString,
@@ -90,16 +95,20 @@ namespace CodePlexIssueMigrator.CodePlex
 
 			for (int i = 0; ; i++)
 			{
-				var commentMatch = Regex.Match(html, @"CommentContainer" + i + "\">.*", RegexOptions.Multiline | RegexOptions.Singleline);
-				if (!commentMatch.Success)
+				var commentNode = root.SelectSingleNode("//div[@id='CommentContainer" + i + "']");
+
+				if (commentNode == null)
 				{
 					break;
 				}
 
-				var commentHtml = commentMatch.Value;
-				var author = GetMatch(commentHtml, "class=\"author\".*?>(.*?)</a>");
+				HtmlDocument commentDoc = new HtmlDocument();
+				doc.LoadHtml(commentNode.InnerHtml);
+				var commentRoot = doc.DocumentNode;
 
-				var timeString = GetMatch(commentHtml, "class=\"smartDate\" title=\"(.*?)\"");
+				var author = commentRoot.SelectSingleNode("//a[@id='PostedByLink" + i + "']").InnerText;
+
+				var timeString = commentRoot.SelectSingleNode("//span[@id='PostedOnDateTime" + i + "']").InnerText;
 				DateTime time;
 				DateTime.TryParse(
 					timeString,
@@ -107,7 +116,7 @@ namespace CodePlexIssueMigrator.CodePlex
 					DateTimeStyles.AllowWhiteSpaces | DateTimeStyles.AssumeUniversal,
 					out time);
 
-				var content = GetMatch(commentHtml, "markDownOutput \">(.*?)</div>");
+				var content = commentRoot.SelectSingleNode("//div[@class='markDownOutput' or @class='markDownOutput ']").InnerHtml;
 				issue.Comments.Add(new CodeplexComment { Content = HtmlToMarkdown(content), Author = author, Time = time });
 			}
 
@@ -116,12 +125,10 @@ namespace CodePlexIssueMigrator.CodePlex
 
 		private string HtmlToMarkdown(string html)
 		{
-			var text = HttpUtility.HtmlDecode(html);
-			text = text.Replace("\r\n<br>\r\n", "\r\n");
-			text = text.Replace("<br>\r\n", "\r\n");
-			text = text.Replace("<pre><code>", "\r\n```");
-			text = text.Replace("</code></pre>", "```");
-			return text.Trim();
+			var config = new ReverseMarkdown.Config("pass_through", true);
+			var converter = new ReverseMarkdown.Converter(config);
+
+			return converter.Convert(html);
 		}
 
 		/// <summary>
