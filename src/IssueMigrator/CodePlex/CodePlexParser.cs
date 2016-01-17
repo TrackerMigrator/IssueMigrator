@@ -118,7 +118,8 @@ namespace CodePlexIssueMigrator.CodePlex
 		{
 			var text = HttpUtility.HtmlDecode(html);
 			text = text.Replace("\r\n<br>\r\n", "\r\n");
-			text = text.Replace("<pre><code>", "```");
+			text = text.Replace("<br>\r\n", "\r\n");
+			text = text.Replace("<pre><code>", "\r\n```");
 			text = text.Replace("</code></pre>", "```");
 			return text.Trim();
 		}
