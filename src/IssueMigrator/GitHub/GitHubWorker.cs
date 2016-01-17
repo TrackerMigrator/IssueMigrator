@@ -45,7 +45,7 @@ namespace CodePlexIssueMigrator.GitHub
 		{
 			var codePlexIssueUrl = string.Format("http://{0}.codeplex.com/workitem/{1}", _options.CodeplexProject, codePlexIssue.Id);
 			var description = new StringBuilder();
-			description.AppendFormat("**This issue was imported from [CodePlex]({0})**", codePlexIssueUrl);
+			description.AppendFormat("<sub>This issue was imported from [CodePlex]({0})</sub>", codePlexIssueUrl);
 			description.AppendLine();
 			description.AppendLine();
 			description.AppendFormat(CultureInfo.InvariantCulture, "**[{0}](http://www.codeplex.com/site/users/view/{0})** wrote {1:yyyy-MM-dd} at {1:HH:mm}\r\n", codePlexIssue.ReportedBy, codePlexIssue.Time);
