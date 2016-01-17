@@ -48,7 +48,8 @@ namespace CodePlexIssueMigrator.GitHub
 			description.AppendFormat("<sub>This issue was imported from [CodePlex]({0})</sub>", codePlexIssueUrl);
 			description.AppendLine();
 			description.AppendLine();
-			description.AppendFormat(CultureInfo.InvariantCulture, "**[{0}](http://www.codeplex.com/site/users/view/{0})** wrote {1:yyyy-MM-dd} at {1:HH:mm}\r\n", codePlexIssue.ReportedBy, codePlexIssue.Time);
+			description.AppendFormat(CultureInfo.InvariantCulture, "**[{0}](https://github.com/{0})** <sup>wrote {1:yyyy-MM-dd} at {1:HH:mm}</sup>", codePlexIssue.ReportedBy, codePlexIssue.Time);
+			description.AppendLine();
 			description.Append(codePlexIssue.Description);
 			foreach (var comment in codePlexIssue.Comments)
 			{
