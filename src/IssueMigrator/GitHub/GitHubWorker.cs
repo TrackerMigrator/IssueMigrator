@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Octokit;
@@ -19,6 +20,8 @@ namespace CodePlexIssueMigrator.GitHub
 		/// <summary>Command line arguments.</summary>
 		private readonly CommandLineOptions _options;
 
+		private int _apiCalls = 0;
+
 		public GitHubWorker(CommandLineOptions options)
 		{
 			_options = options;
@@ -32,7 +35,9 @@ namespace CodePlexIssueMigrator.GitHub
 		{
 			foreach (var issue in issues)
 			{
+				Console.WriteLine("{0} - Adding {1} : {2}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), issue.Id, issue.Title);
 				await CreateIssue(issue);
+				VerifyRateLimit();
 			}
 		}
 
@@ -76,8 +81,11 @@ namespace CodePlexIssueMigrator.GitHub
 
 			var gitHubIssue = await _gitHubClient.Issue.Create(_options.GitHubOwner, _options.GitHubRepository, issue);
 
+			var commentsCount = codePlexIssue.Comments.Count;
+			var n = 0;
 			foreach (var comment in codePlexIssue.Comments)
 			{
+				Console.WriteLine("{0} - > Adding Comment {1}/{2} by {3}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), ++n, commentsCount, comment.Author);
 				await CreateComment(gitHubIssue.Number, comment);
 			}
 
@@ -94,13 +102,28 @@ namespace CodePlexIssueMigrator.GitHub
 			message.AppendLine();
 			message.Append(comment.Content);
 			await _gitHubClient.Issue.Comment.Create(_options.GitHubOwner, _options.GitHubRepository, number, message.ToString());
+			VerifyRateLimit();
 		}
 
 		private async Task CloseIssue(Issue issue)
 		{
 			var issueUpdate = new IssueUpdate { State = ItemState.Closed };
-
+			Console.WriteLine("{0} - > Closing {1} : {2}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), issue.Number, issue.Title);
 			await _gitHubClient.Issue.Update(_options.GitHubOwner, _options.GitHubRepository, issue.Number, issueUpdate);
+		}
+
+		private void VerifyRateLimit()
+		{
+			if (_options.RateLimit > 0)
+			{
+				_apiCalls++;
+				if (_apiCalls >= _options.RateLimit)
+				{
+					Console.WriteLine("{0} -- GitHub API Limit reached: {1} calls. Waiting {2} seconds", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), _apiCalls, _options.RatePause);
+					Thread.Sleep(_options.RatePause * 1000);
+					_apiCalls = 0;
+				}
+			}
 		}
 	}
 }

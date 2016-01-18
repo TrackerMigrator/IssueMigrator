@@ -16,6 +16,8 @@ namespace CodePlexIssueMigrator
 		const string GitHubOwnerHelpText = "GitHub repository owner/organization.";
 		const string GitHubAccessTokenHelpText = "GitHub Access Token.";
 		const string IssueNumberTokenHelpText = "Only migrate numbered issue.";
+		const string RateLimitHelpText = "Number of calls to GitHubApi to make pause, default 0 - no limit";
+		const string RatePauseHelpText = "Pause in seconds, default 60 seconds";
 
 		[HelpOption]
 		public string GetHelp()
@@ -39,5 +41,11 @@ namespace CodePlexIssueMigrator
 
 		[Option("issue", HelpText = IssueNumberTokenHelpText)]
 		public int? IssueNumber { get; set; }
+
+		[Option("rate-limit", DefaultValue = 0, HelpText = RateLimitHelpText)]
+		public int RateLimit { get; set; }
+
+		[Option("rate-pause", DefaultValue = 60, HelpText = RatePauseHelpText)]
+		public int RatePause { get; set; }
 	}
 }
