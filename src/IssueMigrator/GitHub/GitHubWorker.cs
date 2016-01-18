@@ -55,7 +55,7 @@ namespace CodePlexIssueMigrator.GitHub
 			description.AppendLine();
 			description.AppendFormat(CultureInfo.InvariantCulture, "**[{0}](https://github.com/{0})** <sup>wrote {1:yyyy-MM-dd} at {1:HH:mm}</sup>", codePlexIssue.ReportedBy, codePlexIssue.Time);
 			description.AppendLine();
-			description.Append(codePlexIssue.Description);
+			description.Append(FormatForGithub(codePlexIssue.Description));
 
 			var labels = new List<string>();
 
@@ -100,7 +100,7 @@ namespace CodePlexIssueMigrator.GitHub
 			var message = new StringBuilder();
 			message.AppendFormat(CultureInfo.InvariantCulture, "**[{0}](https://github.com/{0})** <sup>wrote {1:yyyy-MM-dd} at {1:HH:mm}</sup>", comment.Author, comment.Time);
 			message.AppendLine();
-			message.Append(comment.Content);
+			message.Append(FormatForGithub(comment.Content));
 			await _gitHubClient.Issue.Comment.Create(_options.GitHubOwner, _options.GitHubRepository, number, message.ToString());
 			VerifyRateLimit();
 		}
@@ -124,6 +124,12 @@ namespace CodePlexIssueMigrator.GitHub
 					_apiCalls = 0;
 				}
 			}
+		}
+
+		private string FormatForGithub(string text)
+		{
+			var converted = text.Replace("#", "*#*");
+			return converted;
 		}
 	}
 }
