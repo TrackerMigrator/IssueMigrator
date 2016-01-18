@@ -69,7 +69,7 @@ namespace CodePlexIssueMigrator.CodePlex
 			doc.LoadHtml(html);
 			var root = doc.DocumentNode;
 
-			var description = root.SelectSingleNode("//div[@id='descriptionContent']").InnerText;
+			var description = root.SelectSingleNode("//div[@id='descriptionContent']").InnerHtml;
 			var reportedBy = root.SelectSingleNode("//a[@id='ReportedByLink']").InnerText;
 
 			var title = root.SelectSingleNode("//h1[@id='workItemTitle']").InnerText;
@@ -77,7 +77,7 @@ namespace CodePlexIssueMigrator.CodePlex
 			var type = root.SelectSingleNode("//a[@id='TypeLink']").InnerText;
 			var impact = root.SelectSingleNode("//a[@id='ImpactLink']").InnerText;
 
-			var reportedTimeString = root.SelectSingleNode("//span[@id='ReportedOnDateTime']").InnerText;
+			var reportedTimeString = root.SelectSingleNode("//span[@id='ReportedOnDateTime']").GetAttributeValue("title", "01/01/1990 00:00:00");
 			DateTime reportedTime;
 			DateTime.TryParse(
 				reportedTimeString,
@@ -103,12 +103,12 @@ namespace CodePlexIssueMigrator.CodePlex
 				}
 
 				HtmlDocument commentDoc = new HtmlDocument();
-				doc.LoadHtml(commentNode.InnerHtml);
-				var commentRoot = doc.DocumentNode;
+				commentDoc.LoadHtml(commentNode.InnerHtml);
+				var commentRoot = commentDoc.DocumentNode;
 
 				var author = commentRoot.SelectSingleNode("//a[@id='PostedByLink" + i + "']").InnerText;
 
-				var timeString = commentRoot.SelectSingleNode("//span[@id='PostedOnDateTime" + i + "']").InnerText;
+				var timeString = commentRoot.SelectSingleNode("//span[@id='PostedOnDateTime" + i + "']"). GetAttributeValue("title", "01/01/1990 00:00:00");
 				DateTime time;
 				DateTime.TryParse(
 					timeString,
