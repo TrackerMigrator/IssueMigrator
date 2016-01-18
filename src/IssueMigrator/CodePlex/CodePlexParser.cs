@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Web;
 
 using HtmlAgilityPack;
 
@@ -42,6 +43,7 @@ namespace CodePlexIssueMigrator.CodePlex
 				{
 					var id = int.Parse(GetMatch(issue, "<td class=\"ID\">(\\d+?)</td>"));
 					var title = GetMatch(issue, "<a id=\"TitleLink.*>(.*?)</a>");
+					title = HttpUtility.HtmlDecode(title);
 
 					Console.WriteLine("{0} : {1}", id, title);
 
