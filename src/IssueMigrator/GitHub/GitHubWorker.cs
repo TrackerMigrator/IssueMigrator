@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Octokit;
 
 using CodePlexIssueMigrator.CodePlex;
+using System;
 
 namespace CodePlexIssueMigrator.GitHub
 {
@@ -40,7 +41,6 @@ namespace CodePlexIssueMigrator.GitHub
 			await CreateIssue(issue);
 		}
 
-
 		private async Task CreateIssue(CodePlexIssue codePlexIssue)
 		{
 			var codePlexIssueUrl = string.Format("http://{0}.codeplex.com/workitem/{1}", _options.CodeplexProject, codePlexIssue.Id);
@@ -51,14 +51,6 @@ namespace CodePlexIssueMigrator.GitHub
 			description.AppendFormat(CultureInfo.InvariantCulture, "**[{0}](https://github.com/{0})** <sup>wrote {1:yyyy-MM-dd} at {1:HH:mm}</sup>", codePlexIssue.ReportedBy, codePlexIssue.Time);
 			description.AppendLine();
 			description.Append(codePlexIssue.Description);
-			foreach (var comment in codePlexIssue.Comments)
-			{
-				description.AppendLine();
-				description.AppendLine();
-				description.AppendFormat(CultureInfo.InvariantCulture, "**[{0}](http://www.codeplex.com/site/users/view/{0})** wrote {1:yyyy-MM-dd} at {1:HH:mm}\r\n", comment.Author, comment.Time);
-				description.Append(comment.Content);
-				// await CreateComment(gitHubIssue.Number, comment.Content);
-			}
 
 			var labels = new List<string>();
 
@@ -84,15 +76,24 @@ namespace CodePlexIssueMigrator.GitHub
 
 			var gitHubIssue = await _gitHubClient.Issue.Create(_options.GitHubOwner, _options.GitHubRepository, issue);
 
+			foreach (var comment in codePlexIssue.Comments)
+			{
+				await CreateComment(gitHubIssue.Number, comment);
+			}
+
 			if (codePlexIssue.IsClosed())
 			{
 				await CloseIssue(gitHubIssue);
 			}
 		}
 
-		private async Task CreateComment(int number, string comment)
+		private async Task CreateComment(int number, CodeplexComment comment)
 		{
-			await _gitHubClient.Issue.Comment.Create(_options.GitHubOwner, _options.GitHubRepository, number, comment);
+			var message = new StringBuilder();
+			message.AppendFormat(CultureInfo.InvariantCulture, "**[{0}](https://github.com/{0})** <sup>wrote {1:yyyy-MM-dd} at {1:HH:mm}</sup>", comment.Author, comment.Time);
+			message.AppendLine();
+			message.Append(comment.Content);
+			await _gitHubClient.Issue.Comment.Create(_options.GitHubOwner, _options.GitHubRepository, number, message.ToString());
 		}
 
 		private async Task CloseIssue(Issue issue)
