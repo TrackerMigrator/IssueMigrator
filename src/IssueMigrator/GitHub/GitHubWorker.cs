@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
@@ -7,7 +8,6 @@ using System.Threading.Tasks;
 using Octokit;
 
 using CodePlexIssueMigrator.CodePlex;
-using System;
 
 namespace CodePlexIssueMigrator.GitHub
 {
@@ -99,10 +99,6 @@ namespace CodePlexIssueMigrator.GitHub
 		private async Task CloseIssue(Issue issue)
 		{
 			var issueUpdate = new IssueUpdate { State = ItemState.Closed };
-			foreach (var label in issue.Labels)
-			{
-				issueUpdate.Labels.Add(label.Name);
-			}
 
 			await _gitHubClient.Issue.Update(_options.GitHubOwner, _options.GitHubRepository, issue.Number, issueUpdate);
 		}
