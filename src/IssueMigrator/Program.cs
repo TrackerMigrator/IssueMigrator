@@ -55,13 +55,13 @@ namespace CodePlexIssueMigrator
 		/// The main logic for migrate CodePlex project issues to GitHub.</summary>
 		private void Run()
 		{
-			Console.WriteLine("Source: {0}.codeplex.com", _options.CodeplexProject);
-			Console.WriteLine("Destination: github.com/{0}/{1}", _options.GitHubOwner, _options.GitHubRepository);
+			Console.WriteLine("{0} -- Source: {1}.codeplex.com", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), _options.CodeplexProject);
+			Console.WriteLine("{0} -- Destination: github.com/{1}/{2}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), _options.GitHubOwner, _options.GitHubRepository);
 
 			MigrateIssues().Wait();
 
 			Console.WriteLine();
-			Console.WriteLine("Completed successfully.");
+			Console.WriteLine("{0} -- Completed successfully", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
 		}
 
 		private async Task MigrateIssues()
@@ -71,16 +71,17 @@ namespace CodePlexIssueMigrator
 
 			if (_options.IssueNumber.HasValue)
 			{
-				Console.WriteLine("Migrating issue #{0}:", _options.IssueNumber.Value);
+				Console.WriteLine("{0} -- Exporting CodePlex issue:", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
 				var issue = await codePlexParser.GetIssue(_options.IssueNumber.Value);
-				Console.WriteLine("{0} : {1}", issue.Id, issue.Title);
-
+				Console.WriteLine("{0} -- Importing to GitHub:", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
 				await gitHubWorker.RunFor(issue);
 			}
 			else
 			{
-				Console.WriteLine("Migrating issues:");
-				await gitHubWorker.Run(codePlexParser.GetIssues());
+				Console.WriteLine("{0} -- Exporting CodePlex issues:", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+				var issues = codePlexParser.GetIssues();
+				Console.WriteLine("{0} -- Importing to GitHub:", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+				await gitHubWorker.Run(issues);
 			}
 		}
 	}

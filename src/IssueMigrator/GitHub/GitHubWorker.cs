@@ -108,7 +108,7 @@ namespace CodePlexIssueMigrator.GitHub
 		private async Task CloseIssue(Issue issue)
 		{
 			var issueUpdate = new IssueUpdate { State = ItemState.Closed };
-			Console.WriteLine("{0} - > Closing {1} : {2}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), issue.Number, issue.Title);
+			Console.WriteLine("{0} - > Close issue", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
 			await _gitHubClient.Issue.Update(_options.GitHubOwner, _options.GitHubRepository, issue.Number, issueUpdate);
 		}
 

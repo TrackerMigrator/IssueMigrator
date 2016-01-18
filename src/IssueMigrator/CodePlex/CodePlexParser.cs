@@ -42,10 +42,6 @@ namespace CodePlexIssueMigrator.CodePlex
 				foreach (var issue in GetMatches(html, "<tr id=\"row_checkbox_\\d+\" class=\"CheckboxRow\">(.*?)</tr>"))
 				{
 					var id = int.Parse(GetMatch(issue, "<td class=\"ID\">(\\d+?)</td>"));
-					var title = GetMatch(issue, "<a id=\"TitleLink.*>(.*?)</a>");
-					title = HttpUtility.HtmlDecode(title);
-
-					Console.WriteLine("{0} : {1}", id, title);
 
 					var codeplexIssue = GetIssue(id).Result;
 					issues.Add(codeplexIssue);
@@ -121,6 +117,8 @@ namespace CodePlexIssueMigrator.CodePlex
 				var content = commentRoot.SelectSingleNode("//div[@class='markDownOutput' or @class='markDownOutput ']").InnerHtml;
 				issue.Comments.Add(new CodeplexComment { Content = HtmlToMarkdown(content), Author = author, Time = time });
 			}
+
+			Console.WriteLine("{0} : {1} ({2} comments)", issue.Id, issue.Title, issue.Comments.Count);
 
 			return issue;
 		}
