@@ -15,10 +15,10 @@ namespace IssueMigrator
 		const string GitHubRepositoryHelpText = "GitHub repository.";
 		const string GitHubOwnerHelpText = "GitHub repository owner/organization.";
 		const string GitHubAccessTokenHelpText = "GitHub Access Token.";
-		const string IssueNumberTokenHelpText = "Only migrate numbered issue.";
-		const string RateLimitHelpText = "Number of calls to GitHubApi to make pause, default 0 - no limit";
-		const string RatePauseHelpText = "Pause in seconds, default 60 seconds";
-		const string AddCodePlexLabelHelpText = @"Indicates if we should add ""CodePlex"" label. Default - not add this label";
+		const string IssueNumberTokenHelpText = "Only migrate selected issue.";
+		const string RateLimitHelpText = "Number of calls to GitHubApi to make pause.";
+		const string RatePauseHelpText = "Pause in seconds.";
+		const string AddCodePlexLabelHelpText = @"Indicates if we should add ""CodePlex"" label.";
 
 		[HelpOption]
 		public string GetHelp()
@@ -37,7 +37,7 @@ namespace IssueMigrator
 		[Option("owner", Required = true, HelpText = GitHubOwnerHelpText)]
 		public string GitHubOwner { get; set; }
 
-		[Option("key", Required = true, HelpText = GitHubAccessTokenHelpText)]
+		[Option("token", Required = true, HelpText = GitHubAccessTokenHelpText)]
 		public string GitHubAccessToken { get; set; }
 
 		[Option("issue", HelpText = IssueNumberTokenHelpText)]
