@@ -74,6 +74,9 @@ namespace IssueMigrator.CodePlex
 			var status = root.SelectSingleNode("//a[@id='StatusLink']").InnerText;
 			var type = root.SelectSingleNode("//a[@id='TypeLink']").InnerText;
 			var impact = root.SelectSingleNode("//a[@id='ImpactLink']").InnerText;
+			var release = root.SelectSingleNode("//a[@id='ReleaseLink']").InnerText;
+			var closedReason = root.SelectSingleNode("//a[@id='ReasonClosedLink']").InnerText;
+			var component = root.SelectSingleNode("//a[@id='ComponentLink']").InnerText;
 
 			var reportedTimeString = root.SelectSingleNode("//span[@id='ReportedOnDateTime']").GetAttributeValue("title", "01/01/1990 00:00:00");
 			DateTime reportedTime;
@@ -90,6 +93,9 @@ namespace IssueMigrator.CodePlex
 			issue.Status = status;
 			issue.Type = type;
 			issue.Impact = impact;
+			issue.Release = release;
+			issue.ClosedReason = closedReason;
+			issue.Component = component;
 
 			for (int i = 0; ; i++)
 			{

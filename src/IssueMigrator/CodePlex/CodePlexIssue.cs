@@ -19,6 +19,9 @@ namespace IssueMigrator.CodePlex
 		public string Impact { get; set; }
 		public DateTime Time { get; set; }
 		public string ReportedBy { get; set; }
+		public string ClosedReason { get; set; }
+		public string Release { get; set; }
+		public string Component { get; set; }
 		public List<CodeplexComment> Comments { get; private set; }
 
 		public bool IsClosed()
