@@ -118,6 +118,33 @@ namespace CodePlexIssueMigrator.CodePlex
 				issue.Comments.Add(new CodeplexComment { Content = HtmlToMarkdown(content), Author = author, Time = time });
 			}
 
+			if (issue.IsClosed())
+			{
+				var closedNode = root.SelectSingleNode("//div[@id='ClosedDiv']");
+
+				HtmlDocument closedDoc = new HtmlDocument();
+				closedDoc.LoadHtml(closedNode.InnerHtml);
+				var closedRoot = closedDoc.DocumentNode;
+
+				var timeString = closedRoot.SelectSingleNode("//span[@id='ClosedOnDateTimeComment']").GetAttributeValue("title", "01/01/1990 00:00:00");
+				DateTime time;
+				DateTime.TryParse(
+					timeString,
+					CultureInfo.InvariantCulture,
+					DateTimeStyles.AllowWhiteSpaces | DateTimeStyles.AssumeUniversal,
+					out time);
+
+				var author = closedRoot.SelectSingleNode("//a[@id='ClosedByLink']").InnerText;
+
+				var content = closedRoot.SelectSingleNode("//div[@class='markDownOutput' or @class='markDownOutput ']").InnerHtml;
+				if (string.IsNullOrEmpty(content))
+				{
+					content = "Closed.";
+				}
+
+				issue.Comments.Add(new CodeplexComment { Content = HtmlToMarkdown(content), Author = author, Time = time });
+			}
+
 			Console.WriteLine("{0} : {1} ({2} comments)", issue.Id, issue.Title, issue.Comments.Count);
 
 			return issue;
