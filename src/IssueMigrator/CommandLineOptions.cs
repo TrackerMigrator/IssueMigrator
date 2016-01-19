@@ -18,6 +18,7 @@ namespace CodePlexIssueMigrator
 		const string IssueNumberTokenHelpText = "Only migrate numbered issue.";
 		const string RateLimitHelpText = "Number of calls to GitHubApi to make pause, default 0 - no limit";
 		const string RatePauseHelpText = "Pause in seconds, default 60 seconds";
+		const string AddCodePlexLabelHelpText = @"Indicates if we should add ""CodePlex"" label. Default - not add this label";
 
 		[HelpOption]
 		public string GetHelp()
@@ -47,5 +48,8 @@ namespace CodePlexIssueMigrator
 
 		[Option("rate-pause", DefaultValue = 60, HelpText = RatePauseHelpText)]
 		public int RatePause { get; set; }
+
+		[Option("add-codeplex", DefaultValue = false, HelpText = AddCodePlexLabelHelpText)]
+		public bool AddCodePlexLabel { get; set; }
 	}
 }

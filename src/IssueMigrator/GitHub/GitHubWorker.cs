@@ -70,7 +70,12 @@ namespace CodePlexIssueMigrator.GitHub
 			//    labels.Add(issue.Impact);
 
 			var issue = new NewIssue(codePlexIssue.Title) { Body = description.ToString().Trim() };
-			issue.Labels.Add("CodePlex");
+
+			if (_options.AddCodePlexLabel)
+			{
+				issue.Labels.Add("CodePlex");
+			}
+
 			foreach (var label in labels)
 			{
 				if (!string.IsNullOrEmpty(label))
