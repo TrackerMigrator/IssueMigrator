@@ -4,10 +4,10 @@ using System.Threading.Tasks;
 
 using CommandLine;
 
-using CodePlexIssueMigrator.CodePlex;
-using CodePlexIssueMigrator.GitHub;
+using IssueMigrator.CodePlex;
+using IssueMigrator.GitHub;
 
-namespace CodePlexIssueMigrator
+namespace IssueMigrator
 {
 	public class Program
 	{

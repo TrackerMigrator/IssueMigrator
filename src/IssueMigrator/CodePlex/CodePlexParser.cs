@@ -9,7 +9,7 @@ using System.Web;
 
 using HtmlAgilityPack;
 
-namespace CodePlexIssueMigrator.CodePlex
+namespace IssueMigrator.CodePlex
 {
 	public class CodePlexParser
 	{

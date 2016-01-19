@@ -1,7 +1,7 @@
 
 using System;
 
-namespace CodePlexIssueMigrator.CodePlex
+namespace IssueMigrator.CodePlex
 {
 	public class CodeplexComment
 	{

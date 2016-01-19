@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 using Octokit;
 
-using CodePlexIssueMigrator.CodePlex;
+using IssueMigrator.CodePlex;
 
-namespace CodePlexIssueMigrator.GitHub
+namespace IssueMigrator.GitHub
 {
 	public class GitHubWorker
 	{

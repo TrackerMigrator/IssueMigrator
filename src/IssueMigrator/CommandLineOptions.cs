@@ -2,7 +2,7 @@
 using CommandLine;
 using CommandLine.Text;
 
-namespace CodePlexIssueMigrator
+namespace IssueMigrator
 {
 	/// <summary>
 	/// The options class which contains the different options to CodePlex to GitHub migration utility.

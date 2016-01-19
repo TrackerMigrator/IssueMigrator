@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace CodePlexIssueMigrator.CodePlex
+namespace IssueMigrator.CodePlex
 {
 	public class CodePlexIssue
 	{
