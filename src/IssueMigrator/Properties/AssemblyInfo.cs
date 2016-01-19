@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("IssueMigrator")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Universal Issue Tracker-to-Tracker Migration Tool")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("IssueMigrator")]
-[assembly: AssemblyCopyright("Copyright © objorke 2014")]
+[assembly: AssemblyCompany("Tracker Migrator")]
+[assembly: AssemblyProduct("Issue Migrator")]
+[assembly: AssemblyCopyright("Copyright © Tracker Migrator, 2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
